@@ -2,7 +2,7 @@
 zap-wrap intergrates zap and log rotate, make zap easier to use
 
 zap is excellent, but its configuration is too complicated. Though zap provides
-a default configuration, but it's not enough for most projects.
+a default configuration, it's not enough for most projects.
 
 ### use case
 If you:
