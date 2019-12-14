@@ -57,10 +57,10 @@ func main() {
         // So easy
 	logger, _ := zap_wrap.NewLogger(cfgs...)
 
-	logger.Debug("123", zap.Int("rand", rand.Intn(30)), zap.String("foo", `{"key":"value"}`))
+	logger.Debug("123", zap.Int("rand", rand.Intn(30)))
         // In access.log: {"level":"debug","time":"2019-12-14T19:52:56+08:00","caller":"triple/main.go:28","msg":"123","rand":20}
 
-	logger.Error("ttt", zap.Int("rand", rand.Intn(30)), zap.String("foo", `{"key":"value"}`))
+	logger.Error("ttt", zap.Int("rand", rand.Intn(30)))
         // In error.log: {"level":"warn","time":"2019-12-14T19:52:56+08:00","caller":"triple/main.go:28","msg":"ttt","rand":5}
 
 }
