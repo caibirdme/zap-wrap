@@ -15,7 +15,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logger, err := zap_wrap.NewLogger(cfgs...)
+	logger, err := zap_wrap.NewLogger(true, cfgs...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,4 +51,3 @@ const jsonCfg = `
   }
 ]
 `
-

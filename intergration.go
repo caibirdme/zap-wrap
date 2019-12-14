@@ -36,10 +36,6 @@ type FileConfig struct {
 
 type Duration time.Duration
 
-func (d Duration) MarshalJSON() ([]byte, error) {
-	return json.Marshal(time.Duration(d).String())
-}
-
 func (d *Duration) UnmarshalJSON(b []byte) error {
 	var v interface{}
 	if err := json.Unmarshal(b, &v); err != nil {
@@ -82,20 +78,20 @@ func (s sortConfig) Len() int {
 	return len(s)
 }
 
-func (s sortConfig) Swap(i,j int) {
-	s[i],s[j] = s[j],s[i]
+func (s sortConfig) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }
 
-func (s sortConfig) Less(i,j int) bool {
+func (s sortConfig) Less(i, j int) bool {
 	return s[i].Level.Level < s[j].Level.Level
 }
 
 // NewLogger combines multiple writers and creates an uniform zap.Logger
-func NewLogger(cfgs ...FileConfig) (*zap.Logger, error) {
+func NewLogger(addCaller bool, cfgs ...FileConfig) (*zap.Logger, error) {
 	sort.Sort(sortConfig(cfgs))
 	n := len(cfgs)
 	levelEnablers := make([]zapcore.LevelEnabler, 0, n)
-	for i:=0; i<n-1; i++ {
+	for i := 0; i < n-1; i++ {
 		t := i
 		levelEnablers = append(levelEnablers, zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 			return cfgs[t].Level.Enabled(lvl) && !cfgs[t+1].Level.Enabled(lvl)
@@ -124,7 +120,7 @@ func NewLogger(cfgs ...FileConfig) (*zap.Logger, error) {
 		EncodeDuration: milliSecondsEncoder,
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
-	for idx,cfg := range cfgs {
+	for idx, cfg := range cfgs {
 		var enc zapcore.Encoder
 		if cfg.EncodeCfg == nil {
 			enc = zapcore.NewJSONEncoder(defaultCfg)
@@ -133,7 +129,10 @@ func NewLogger(cfgs ...FileConfig) (*zap.Logger, error) {
 		}
 		cores = append(cores, zapcore.NewCore(enc, zapcore.AddSync(writers[idx]), levelEnablers[idx]))
 	}
-	return zap.New(zapcore.NewTee(cores...), zap.AddCaller()), nil
+	if addCaller {
+		return zap.New(zapcore.NewTee(cores...), zap.AddCaller()), nil
+	}
+	return zap.New(zapcore.NewTee(cores...)), nil
 }
 
 func milliSecondsEncoder(d time.Duration, enc zapcore.PrimitiveArrayEncoder) {
@@ -160,7 +159,7 @@ func newRotateWriter(cfg FileConfig) (io.WriteCloser, error) {
 	}
 	logger, err := rotate.New(
 		realFileName,
-		options...
+		options...,
 	)
 	if err != nil {
 		return nil, err
