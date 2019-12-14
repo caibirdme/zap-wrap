@@ -19,7 +19,7 @@ this is for you!
     "log_dir": "/home/deen/test",
     "filename": "access.log",
     "suffix": "%Y%m%d%H",
-    "rotate_duration": "1m",
+    "rotate_duration": "1h",
     "retain_age": "168h",
     "soft_link": true,
     "level": "debug"
@@ -28,13 +28,26 @@ this is for you!
     "log_dir": "/home/deen/test",
     "filename": "error.log",
     "suffix": "%Y%m%d%H",
-    "rotate_duration": "1m",
+    "rotate_duration": "1h",
     "retain_age": "168h",
     "soft_link": true,
     "level": "warn"
   }
 ]
 ```
+config above means:
+* rotate once an hour
+* old log file will be named as access.log.2019121420
+    * %Y: year
+    * %m: Month
+    * %d: day
+    * %H: hour
+    * %M: minute
+* clear old log files which exist over 168 hours
+* create symbol link named access.log to access.log.{current}, so that you can find the current log right away
+* level >= warn -> error.log
+* level >= debug && level < warn -> access.log
+
 then
 ```go
 func main() {
