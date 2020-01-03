@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io"
+	"os"
 	"path/filepath"
 	"sort"
 	"time"
@@ -141,9 +142,22 @@ func milliSecondsEncoder(d time.Duration, enc zapcore.PrimitiveArrayEncoder) {
 
 func newRotateWriter(cfg FileConfig) (io.WriteCloser, error) {
 	var options []rotate.Option
-	realFileName := filepath.Join(cfg.LogDir, cfg.FileName)
+	absLog, err := filepath.Abs(cfg.LogDir)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = os.Stat(absLog); err != nil && os.IsNotExist(err) {
+		err = os.Mkdir(absLog, 0755)
+		if err != nil {
+			return nil, err
+		}
+	}
+	absFileName, err := filepath.Abs(filepath.Join(cfg.LogDir, cfg.FileName))
+	if err != nil {
+		return nil, err
+	}
 	if cfg.SoftLink {
-		options = append(options, rotate.WithLinkName(realFileName))
+		options = append(options, rotate.WithLinkName(absFileName))
 	}
 	if cfg.RotatePeriod != 0 {
 		options = append(options, rotate.WithRotationTime(time.Duration(cfg.RotatePeriod)))
@@ -155,10 +169,10 @@ func newRotateWriter(cfg FileConfig) (io.WriteCloser, error) {
 	}
 
 	if cfg.Suffix != "" {
-		realFileName += "." + cfg.Suffix
+		absFileName += "." + cfg.Suffix
 	}
 	logger, err := rotate.New(
-		realFileName,
+		absFileName,
 		options...,
 	)
 	if err != nil {

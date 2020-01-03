@@ -32,7 +32,7 @@ func main() {
 const jsonCfg = `
 [
   {
-    "log_dir": "/home/deen/test",
+    "log_dir": "./log",
     "filename": "access.log",
     "suffix": "%Y%m%d%H%M",
     "rotate_duration": "1m",
@@ -41,7 +41,7 @@ const jsonCfg = `
     "level": "debug"
   },
   {
-    "log_dir": "/home/deen/test",
+    "log_dir": "./log",
     "filename": "error.log",
     "suffix": "%Y%m%d%H%M",
     "rotate_duration": "1m",

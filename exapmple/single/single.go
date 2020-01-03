@@ -11,7 +11,7 @@ import (
 
 const nosplitCfg = `
 {
-	"log_dir": "/home/deen/test",
+	"log_dir": "./log",
 	"filename": "some.log",
 	"suffix": "%Y%m%d%H%M",
 	"rotate_duration": "1m",
