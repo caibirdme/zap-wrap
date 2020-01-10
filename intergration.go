@@ -30,6 +30,8 @@ type FileConfig struct {
 	SoftLink bool `json:"soft_link"`
 	// Level, set log level
 	Level LogLevel `json:"level"`
+	// Caller, set if log caller info
+	Caller bool `json:"caller"`
 	// EncodeCfg, ignore this if you don't know about it. This lib provides a default config that may meet most
 	// users' requirement
 	EncodeCfg *zapcore.EncoderConfig
@@ -112,7 +114,7 @@ func NewLogger(addCaller bool, cfgs ...FileConfig) (*zap.Logger, error) {
 		TimeKey:        "time",
 		LevelKey:       "level",
 		NameKey:        "logger",
-		CallerKey:      "caller",
+		CallerKey:      "",
 		MessageKey:     "msg",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
@@ -123,10 +125,14 @@ func NewLogger(addCaller bool, cfgs ...FileConfig) (*zap.Logger, error) {
 	}
 	for idx, cfg := range cfgs {
 		var enc zapcore.Encoder
-		if cfg.EncodeCfg == nil {
-			enc = zapcore.NewJSONEncoder(defaultCfg)
-		} else {
+		if cfg.EncodeCfg != nil {
 			enc = zapcore.NewJSONEncoder(*cfg.EncodeCfg)
+		} else {
+			clonedCfg := defaultCfg
+			if cfg.Caller {
+				clonedCfg.CallerKey = "caller"
+			}
+			enc = zapcore.NewJSONEncoder(clonedCfg)
 		}
 		cores = append(cores, zapcore.NewCore(enc, zapcore.AddSync(writers[idx]), levelEnablers[idx]))
 	}
